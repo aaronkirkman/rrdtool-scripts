@@ -30,6 +30,7 @@ $rrdtool update $database -t temp N:`acpi -t | cut -f 4 -d " "`
 for period in day week month year
 do
 	$rrdtool graph $graphs/temperature-$period.png -s -1$period \
+	--font "DEFAULT:13" \
 	-t "CPU temperature over the last $period" -z \
 	-c "BACK#FFFFFF" -c "SHADEA#FFFFFF" -c "SHADEB#FFFFFF" \
 	-c "MGRID#AAAAAA" -c "GRID#CCCCCC" -c "ARROW#333333" \
