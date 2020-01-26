@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+rrdtool=/usr/bin/rrdtool
+logs=~/.log
+database=${logs}/temperature.rrd
+database=${logs}/temperature.rrd
+graphs=${logs}
+
+mkdir -p ${logs}
+
+# Assuming each primary data point (PDP) is at 5-minute intervals:
+# 1:576 = two days worth
+# 6:672 = two weeks worth
+# 24:732 = 61 days (approx. two months)
+# 144:1460 = 730 days (approx. two years)
+if [ ! -e $database ]
+then 
+	$rrdtool create $database \
+	--start=now-10s \
+	--step 300 \
+	DS:temp:GAUGE:600:0:500 \
+	RRA:AVERAGE:0.5:1:576 \
+	RRA:AVERAGE:0.5:6:672 \
+	RRA:AVERAGE:0.5:24:732 \
+	RRA:AVERAGE:0.5:144:1460
+fi
+
+$rrdtool update $database -t temp N:`acpi -t | cut -f 4 -d " "`
+
+for period in day week month year
+do
+	$rrdtool graph $graphs/temperature-$period.png -s -1$period \
+	-t "CPU temperature over the last $period" -z \
+	-c "BACK#FFFFFF" -c "SHADEA#FFFFFF" -c "SHADEB#FFFFFF" \
+	-c "MGRID#AAAAAA" -c "GRID#CCCCCC" -c "ARROW#333333" \
+	-c "FONT#333333" -c "AXIS#333333" -c "FRAME#333333" \
+        -h 134 -w 543 -l 0 -a PNG -v "C" \
+	DEF:temp=$database:temp:AVERAGE \
+	VDEF:min=temp,MINIMUM \
+	VDEF:max=temp,MAXIMUM \
+	VDEF:avg=temp,AVERAGE \
+	VDEF:lst=temp,LAST \
+	"COMMENT: \l" \
+	"COMMENT:               " \
+	"COMMENT:Minimum    " \
+	"COMMENT:Maximum    " \
+	"COMMENT:Average    " \
+	"COMMENT:Current    \l" \
+	"COMMENT:   " \
+	"AREA:temp#EDA362:temp  " \
+	"LINE1:temp#F47200" \
+	"GPRINT:min:%5.1lf %sC   " \
+	"GPRINT:max:%5.1lf %sC   " \
+	"GPRINT:avg:%5.1lf %sC   " \
+	"GPRINT:lst:%5.1lf %sC   \l" > /dev/null
+done
