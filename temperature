@@ -34,7 +34,7 @@ do
 	-c "BACK#FFFFFF" -c "SHADEA#FFFFFF" -c "SHADEB#FFFFFF" \
 	-c "MGRID#AAAAAA" -c "GRID#CCCCCC" -c "ARROW#333333" \
 	-c "FONT#333333" -c "AXIS#333333" -c "FRAME#333333" \
-        -h 134 -w 543 -l 0 -a PNG -v "C" \
+        -h 400 -w 1600 -l 0 -a PNG -v "C" \
 	DEF:temp=$database:temp:AVERAGE \
 	VDEF:min=temp,MINIMUM \
 	VDEF:max=temp,MAXIMUM \
