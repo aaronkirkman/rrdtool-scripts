@@ -1,6 +1,7 @@
 These bash scripts use RRDtool to log and graph:
 
 * CPU temperature
+* Network usage
 
 I run these scripts using crontab:
 
