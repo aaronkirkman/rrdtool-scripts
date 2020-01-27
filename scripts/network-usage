@@ -31,8 +31,6 @@ fi
 function usage() {
 	ip -s addr show $interface | grep "$1: bytes" -A1 | grep -v "$1: bytes" | awk '{print $1}'
 }
-RX=$(usage RX)
-TX=$(usage TX)
 
 $rrdtool update $database -t rx:tx N:`usage RX`:`usage TX`
 
