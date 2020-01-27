@@ -36,7 +36,6 @@ TX=$(usage TX)
 
 $rrdtool update $database -t rx:tx N:`usage RX`:`usage TX`
 
-
 for period in day week month year
 do
 	$rrdtool graph $graphs/network-usage-$period.png -s -1$period \
