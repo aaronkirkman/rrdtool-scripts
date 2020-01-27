@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+
+rrdtool=/usr/bin/rrdtool
+logs=~/.log
+database=${logs}/network-usage.rrd
+database=${logs}/network-usage.rrd
+graphs=${logs}
+
+interface=wlp4s0
+
+mkdir -p ${logs}
+
+if [ ! -e $database ]
+then 
+	$rrdtool create $database \
+	--start=now-10s \
+	--step 300 \
+	DS:rx:DERIVE:600:0:12500000 \
+	DS:tx:DERIVE:600:0:12500000 \
+	RRA:AVERAGE:0.5:1:576 \
+	RRA:AVERAGE:0.5:6:672 \
+	RRA:AVERAGE:0.5:24:732 \
+	RRA:AVERAGE:0.5:144:1460
+fi
+
+# The output from ip looks like this:
+#	RX: bytes  packets  errors  dropped overrun mcast
+# 	4031921055 3122319  0       0       0       0
+# 	TX: bytes  packets  errors  dropped carrier collsns
+#	368371851  834924   0       0       0       0
+function usage() {
+	ip -s addr show $interface | grep "$1: bytes" -A1 | grep -v "$1: bytes" | awk '{print $1}'
+}
+RX=$(usage RX)
+TX=$(usage TX)
+
+$rrdtool update $database -t rx:tx N:`usage RX`:`usage TX`
+
+
+for period in day week month year
+do
+	$rrdtool graph $graphs/network-usage-$period.png -s -1$period \
+	--font "DEFAULT:13" \
+	-t "Network usage over the last $period" -z \
+	-c "BACK#FFFFFF" -c "SHADEA#FFFFFF" -c "SHADEB#FFFFFF" \
+	-c "MGRID#AAAAAA" -c "GRID#CCCCCC" -c "ARROW#333333" \
+	-c "FONT#333333" -c "AXIS#333333" -c "FRAME#333333" \
+	-h 400 -w 1600 -l 0 -a PNG -v "C" \
+	DEF:rx=$database:rx:AVERAGE \
+	DEF:tx=$database:tx:AVERAGE \
+	VDEF:minrx=rx,MINIMUM \
+	VDEF:mintx=tx,MINIMUM \
+	VDEF:maxrx=rx,MAXIMUM \
+	VDEF:maxtx=tx,MAXIMUM \
+	VDEF:avgrx=rx,AVERAGE \
+	VDEF:avgtx=tx,AVERAGE \
+	VDEF:lstrx=rx,LAST \
+	VDEF:lsttx=tx,LAST \
+	VDEF:totrx=rx,TOTAL \
+	VDEF:tottx=tx,TOTAL \
+	"COMMENT: \l" \
+	"COMMENT:               " \
+	"COMMENT:Minimum      " \
+	"COMMENT:Maximum      " \
+	"COMMENT:Average      " \
+	"COMMENT:Current      " \
+	"COMMENT:Total        \l" \
+	"COMMENT:   " \
+	"AREA:tx#EDA362:Out  " \
+	"LINE1:tx#F47200" \
+	"GPRINT:mintx:%5.1lf %sB/s   " \
+	"GPRINT:maxtx:%5.1lf %sB/s   " \
+	"GPRINT:avgtx:%5.1lf %sB/s   " \
+	"GPRINT:lsttx:%5.1lf %sB/s   " \
+	"GPRINT:tottx:%5.1lf %sB   \l" \
+	"COMMENT:   " \
+	"AREA:rx#8AD3F1:In   " \
+	"LINE1:rx#49BEEF" \
+	"GPRINT:minrx:%5.1lf %sB/s   " \
+	"GPRINT:maxrx:%5.1lf %sB/s   " \
+	"GPRINT:avgrx:%5.1lf %sB/s   " \
+	"GPRINT:lstrx:%5.1lf %sB/s   " \
+	"GPRINT:totrx:%5.1lf %sB   \l" > /dev/null
+done
