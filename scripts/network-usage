@@ -38,7 +38,7 @@ for period in day week month year
 do
 	$rrdtool graph $graphs/network-usage-$period.png -s -1$period \
 	--font "DEFAULT:13" \
-	-t "Network usage over the last $period" -z \
+	-t "Network usage (change) over the last $period" -z \
 	-c "BACK#FFFFFF" -c "SHADEA#FFFFFF" -c "SHADEB#FFFFFF" \
 	-c "MGRID#AAAAAA" -c "GRID#CCCCCC" -c "ARROW#333333" \
 	-c "FONT#333333" -c "AXIS#333333" -c "FRAME#333333" \
