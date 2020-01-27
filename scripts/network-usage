@@ -42,7 +42,7 @@ do
 	-c "BACK#FFFFFF" -c "SHADEA#FFFFFF" -c "SHADEB#FFFFFF" \
 	-c "MGRID#AAAAAA" -c "GRID#CCCCCC" -c "ARROW#333333" \
 	-c "FONT#333333" -c "AXIS#333333" -c "FRAME#333333" \
-	-h 400 -w 1600 -l 0 -a PNG -v "C" \
+	-h 350 -w 1500 -l 0 -a PNG -v "C" \
 	DEF:rx=$database:rx:AVERAGE \
 	DEF:tx=$database:tx:AVERAGE \
 	VDEF:minrx=rx,MINIMUM \
