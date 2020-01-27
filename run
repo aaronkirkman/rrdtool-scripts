@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-scripts/./temperature
-scripts/./network-usage
+~/Dropbox/projects/rrdtool/scripts/./temperature
+~/Dropbox/proejcts/rrdtool/scripts/./network-usage
 
 cd ~/.log
 convert temperature-day.png network-usage-day.png -append background.png
